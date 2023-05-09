@@ -1,16 +1,24 @@
-import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import { aws_apigateway, Stack, StackProps } from "aws-cdk-lib";
+import { Construct } from "constructs";
 
-export class CdkStarterStackStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+interface CdkStarterStackStackPros extends StackProps {
+  api: aws_apigateway.RestApi;
+  stageName: "dev" | "prod";
+}
 
-    // The code that defines your stack goes here
+export class CdkStarterStackStack extends Stack {
+  constructor(scope: Construct, id: string, props: CdkStarterStackStackPros) {
+    const { api, stageName, ...stackProps } = props;
+    super(scope, id, stackProps);
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'CdkStarterStackQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    const deployment = new aws_apigateway.Deployment(
+      this,
+      `my-api-deployment`,
+      { api }
+    );
+    new aws_apigateway.Stage(this, `my-api-stage`, {
+      stageName,
+      deployment,
+    });
   }
 }
